@@ -1,0 +1,33 @@
+# 使用前复制一份命名为 config.toml，再填入你自己的信息
+
+[llm]
+# 任意 OpenAI 兼容接口均可（DeepSeek / 智谱 / 通义 / OpenAI...）
+base_url = "https://open.bigmodel.cn/api/paas/v4"
+api_key = ""           # 自己的 key 填这里，不要提交真实 key
+model = "glm-4.5-flash"
+interval = 1.0        # 每次请求间隔（秒）
+
+[sync]
+headless = false      # true = 不弹出浏览器窗口（需已完成登录）
+max_items = 500       # 单次最多同步的收藏条数
+scroll_wait = 1.5     # 每屏滚动的等待秒数，调小易触发风控
+
+[server]
+host = "127.0.0.1"
+port = 8642
+
+# 在这里定义你的类目；keywords 命中时直接归类，不再调用 LLM
+[[categories]]
+name = "AI学习"
+description = "AI 工具、大模型教程、AI 行业资讯与观点"
+keywords = ["AI", "大模型", "DeepSeek", "Claude", "GPT", "智能体", "Copilot", "token自由"]
+
+[[categories]]
+name = "高数"
+description = "高等数学、微积分、线性代数、考研数学等数学学习内容"
+keywords = ["高数", "微积分", "线性代数", "概率论", "考研数学", "定积分", "导数"]
+
+[[categories]]
+name = "其他"
+description = "不属于以上类目的内容，作为兜底"
+keywords = []

@@ -1,0 +1,10 @@
+# 不要提交任何隐私数据 / 本地配置 / 运行时数据
+config.toml
+data/
+__pycache__/
+*.pyc
+*.log
+*.db
+*.db-wal
+*.db-shm
+.env

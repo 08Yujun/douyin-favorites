@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的收藏 · 抖音收藏盒</title>
+<style>
+  :root {
+    --bg: #f5efe4; --card: #fffdf8; --line: #e8dcc4; --ink: #4a4237;
+    --sub: #8f8067; --gold: #b98a2f; --gold-soft: #fdf3dd;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 14px/1.5 system-ui, "Microsoft YaHei", sans-serif; }
+  header { display: flex; align-items: center; gap: 16px;
+           padding: 18px 24px 10px; max-width: 1280px; margin: 0 auto; }
+  .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--gold);
+          color: #fff; display: flex; align-items: center; justify-content: center;
+          font-size: 20px; font-weight: 700; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 0; color: var(--sub); font-size: 12px; }
+  #search { margin-left: auto; width: 300px; padding: 8px 14px; border: 1px solid var(--line);
+            border-radius: 999px; background: var(--card); outline: none; }
+  #search:focus { border-color: var(--gold); }
+  nav { max-width: 1280px; margin: 0 auto; padding: 6px 24px; display: flex;
+        flex-wrap: wrap; gap: 8px; }
+  .tab, .chip { border: 1px solid var(--line); background: var(--card); color: var(--ink);
+                border-radius: 999px; padding: 7px 16px; cursor: pointer; font-size: 13px; }
+  .tab small { opacity: .55; margin-left: 4px; }
+  .chip { padding: 4px 12px; font-size: 12px; background: #efe6d2; }
+  .tab.active, .chip.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+  main { max-width: 1280px; margin: 10px auto 40px; padding: 0 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+          gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          overflow: hidden; cursor: pointer; transition: transform .12s; display: flex;
+          flex-direction: column; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+  .cover { position: relative; height: 150px; background: #efe4cf;
+           display: flex; align-items: center; justify-content: center; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .cover.noimg::after { content: "豆"; font-size: 40px; color: #d9c79b; font-weight: 700; }
+  .badges { position: absolute; top: 8px; left: 8px; display: flex; flex-direction: column;
+            gap: 4px; align-items: flex-start; }
+  .badge { background: rgba(255,255,255,.85); border-radius: 6px; padding: 2px 8px;
+           font-size: 11px; color: var(--sub); }
+  .badge.date { font-variant-numeric: tabular-nums; }
+  .card h3 { margin: 10px 12px 6px; font-size: 15px; line-height: 1.35;
+             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+             overflow: hidden; min-height: 40px; }
+  .summary { margin: 0 12px 10px; background: var(--gold-soft); border-radius: 10px;
+             padding: 7px 10px; font-size: 12px; color: #7a6a4a;
+             display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+             overflow: hidden; }
+  .summary .tag { color: var(--gold); font-weight: 600; margin-right: 6px; }
+  .summary.empty { color: #b3a88d; }
+  .meta { margin-top: auto; padding: 0 12px 10px; display: flex; align-items: center;
+          justify-content: space-between; gap: 6px; font-size: 12px; color: var(--sub); }
+  .labels { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .mini { background: #efe6d2; border-radius: 5px; padding: 1px 7px; font-size: 11px; }
+  footer { text-align: center; padding: 10px 0 40px; }
+  #more { border: 1px solid var(--line); background: var(--card); color: var(--sub);
+          border-radius: 999px; padding: 10px 26px; cursor: pointer; }
+  #more[hidden] { display: none; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex;
+           align-items: center; justify-content: center; z-index: 10; }
+  .modal.hidden { display: none; }
+  .panel { background: var(--card); border-radius: 16px; width: min(680px, 92vw);
+           max-height: 84vh; overflow: auto; padding: 20px; }
+  .panel .cover { height: 210px; border-radius: 12px; margin-bottom: 14px; }
+  .panel h2 { margin: 4px 0 10px; font-size: 18px; }
+  .panel .row { color: var(--sub); font-size: 13px; margin: 4px 0; }
+  .panel .desc { background: var(--gold-soft); border-radius: 10px; padding: 10px 12px;
+                 font-size: 13px; margin: 10px 0; white-space: pre-wrap; }
+  .edit { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0;}
+  .actions { display: flex; gap: 10px; margin-top: 14px; }
+  .btn { border-radius: 999px; padding: 9px 20px; cursor: pointer; font-size: 13px;
+         border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .btn.primary { background: var(--gold); color: #fff; border-color: var(--gold); }
+  .btn.ghost { color: var(--sub); }
+  .empty-tip { color: var(--sub); text-align: center; grid-column: 1/-1; padding: 60px 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">豆</div>
+  <div><h1>我的收藏</h1><p>抖音收藏整理（含 AI 要点）</p></div>
+  <input id="search" placeholder="搜索标题 / 作者 / 要点…">
+</header>
+<nav id="tabs"></nav>
+<nav id="chips"></nav>
+<main><div id="grid" class="grid"></div></main>
+<footer><button id="more" hidden>加载更多</button></footer>
+
+<div id="modal" class="modal hidden">
+  <div class="panel">
+    <div id="m-cover" class="cover noimg"></div>
+    <h2 id="m-title"></h2>
+    <div class="row" id="m-author"></div>
+    <div class="row" id="m-date"></div>
+    <div id="m-labels" class="edit"></div>
+    <div class="row" style="font-size:12px;color:var(--sub)">点击类目标签可多选/取消，保存即教给分类器</div>
+    <div class="desc" id="m-desc"></div>
+    <div class="summary" id="m-summary"></div>
+    <div class="actions">
+      <button class="btn primary" id="m-save">保存分类</button>
+      <button class="btn" id="m-open">查看原视频</button>
+      <button class="btn ghost" id="m-close">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TYPE = { video:'视频', image:'图文', playlist:'合集', other:'其他' };
+const state = { type:'全部', label:'全部', q:'', offset:0, limit:60, stats:{}, cats:[] };
+const cache = {};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function boot() {
+  [state.cats, state.stats] = await Promise.all([
+    fetch('/api/categories').then(r => r.json()),
+    fetch('/api/stats').then(r => r.json())
+  ]);
+  renderTabs(); renderChips(); load(true);
+}
+
+function renderTabs() {
+  const t = state.stats.types || {};
+  const mk = (id, name, count) =>
+    `<button class="tab ${state.type === id ? 'active' : ''}" data-type="${id}">
+       ${name}<small>${count ?? 0}</small></button>`;
+  $('#tabs').innerHTML =
+    mk('全部','全部', state.stats.total) + mk('video','视频', t.video) +
+    mk('image','图文', t.image) + mk('playlist','合集', t.playlist) +
+    mk('other','其他', t.other);
+  $('#tabs').querySelectorAll('.tab').forEach(b =>
+    b.onclick = () => { state.type = b.dataset.type; load(true); });
+}
+
+function renderChips() {
+  const list = [{name:'全部', count: state.stats.total},
+                ...(state.stats.labels || []),
+                {name:'未分类', count: state.stats.unclassified}];
+  $('#chips').innerHTML = list.map(l =>
+    `<button class="chip ${state.label === l.name ? 'active' : ''}"
+             data-label="${esc(l.name)}">${esc(l.name)} ${l.count}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(b =>
+    b.onclick = () => { state.label = b.dataset.label; load(true); });
+}
+
+async function load(reset) {
+  if (reset) { state.offset = 0; $('#grid').innerHTML = ''; }
+  const p = new URLSearchParams();
+  if (state.type !== '全部') p.set('type', state.type);
+  if (state.label !== '全部') p.set('label', state.label);
+  if (state.q) p.set('q', state.q);
+  p.set('limit', state.limit); p.set('offset', state.offset);
+  const { items } = await fetch('/api/items?' + p).then(r => r.json());
+  items.forEach(it => cache[it.aweme_id] = it);
+  $('#grid').insertAdjacentHTML('beforeend',
+    items.length ? items.map(card) : (reset ? '<div class="empty-tip">暂无内容：先运行 sync 同步或 demo 生成演示数据</div>' : ''));
+  state.offset += items.length;
+  $('#more').hidden = items.length < state.limit;
+}
+
+function card(it) {
+  const date = (it.collected_at || '').slice(5, 10);
+  const cover = it.cover_url
+    ? `<img src="${esc(it.cover_url)}" loading="lazy" referrerpolicy="no-referrer"
+             onerror="this.parentElement.classList.add('noimg');this.remove()">`
+    : '';
+  const labels = (it.labels || []).length
+    ? (it.labels || []).map(l => `<span class="mini">${esc(l)}</span>`).join('')
+    : `<span class="mini" style="background:#f3ecdd;color:#b3a88d">未分类</span>`;
+  const summary = it.summary
+    ? `<div class="summary"><span class="tag">✦ 摘要</span>${esc(it.summary)}</div>`
+    : `<div class="summary empty"><span class="tag">✦ 摘要</span>待生成 · 点击进入可手动分类</div>`;
+  return `<article class="card" data-id="${it.aweme_id}">
+    <div class="cover ${it.cover_url ? '' : 'noimg'}">${cover}
+      <div class="badges"><span class="badge">${TYPE[it.type] || it.type}</span>
+      <span class="badge date">${esc(date)}</span></div></div>
+    <h3>${esc(it.title || it.desc || '（无标题）')}</h3>
+    ${summary}
+    <div class="meta"><span>👤 ${esc(it.author || '未知')}</span><span class="labels">${labels}</span></div>
+  </article>`;
+}
+
+$('#grid').addEventListener('click', e => {
+  const c = e.target.closest('.card'); if (c) openModal(c.dataset.id);
+});
+
+let editing = [];
+function openModal(id) {
+  const it = cache[id]; if (!it) return;
+  editing = new Set(it.labels || []);
+  $('#m-cover').innerHTML = it.cover_url
+    ? `<img src="${esc(it.cover_url)}" referrerpolicy="no-referrer"
+             onerror="this.remove();$('#m-cover').classList.add('noimg')">`
+    : `<div class="cover noimg" style="height:210px">豆</div>`;
+  $('#m-title').textContent = it.title || it.desc || '（无标题）';
+  $('#m-author').textContent = '👤 作者：' + (it.author || '未知');
+  $('#m-date').textContent = `收藏于 ${it.collected_at || '-'}　发布于 ${it.published_at || '-'}`;
+  $('#m-desc').textContent = it.desc || '';
+  $('#m-summary').innerHTML = it.summary
+    ? `<span class="tag">✦ AI 摘要</span>${esc(it.summary)}`
+    : `<span class="tag">✦ AI 摘要</span>暂无`;
+  renderEdit();
+  $('#m-open').onclick = () => window.open(it.share_url, '_blank');
+  $('#m-save').onclick = async () => {
+    await fetch(`/api/items/${id}/labels`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ labels: [...editing] })
+    });
+    Object.assign(it, { labels: [...editing] });
+    $('#modal').classList.add('hidden'); boot();
+  };
+  $('#modal').classList.remove('hidden');
+}
+function renderEdit() {
+  $('#m-labels').innerHTML = state.cats.map(c =>
+    `<button class="chip ${editing.has(c.name) ? 'active' : ''}" data-c="${esc(c.name)}">${esc(c.name)}</button>`
+  ).join('');
+  $('#m-labels').querySelectorAll('.chip').forEach(b =>
+    b.onclick = () => {
+      const n = b.dataset.c;
+      editing.has(n) ? editing.delete(n) : editing.add(n);
+      renderEdit();
+    });
+}
+$('#m-close').onclick = () => $('#modal').classList.add('hidden');
+$('#modal').addEventListener('click', e =>
+  { if (e.target === $('#modal')) $('#modal').classList.add('hidden'); });
+$('#more').onclick = () => load(false);
+let deb;
+$('#search').addEventListener('input', e => {
+  clearTimeout(deb);
+  deb = setTimeout(() => { state.q = e.target.value.trim(); load(true); }, 350);
+});
+boot();
+</script>
+</body>
+</html>
