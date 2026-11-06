@@ -15,15 +15,21 @@ app = FastAPI(title="抖音收藏盒")
 
 @app.middleware("http")
 async def basic_auth_gate(request: Request, call_next):  # noqa: ANN201
-    """设置 share_password 后，所有页面与接口都需密码（HTTP Basic）。"""
+    """admin 设 share_password 后：公网访问要密码；本机与家庭局域网免密直通。"""
     password = str(server_config().get("share_password", "")).strip()
     if password:
-        token = "Basic " + base64.b64encode(f"user:{password}".encode()).decode()
-        if request.headers.get("Authorization", "") != token:
-            return Response(
-                status_code=401,
-                headers={"WWW-Authenticate": 'Basic realm="fav", charset="UTF-8"'},
-            )
+        # 无头云隧道转发回来的请求，客户端地址是 127.0.0.1 但必然带真实来源头，
+        # 用它识别"公网访客"；本机/局域网(192.168.*)直连则免密。
+        via_tunnel = bool(request.headers.get("CF-Connecting-IP"))
+        client_ip = request.client.host if request.client else ""
+        is_local = client_ip in ("127.0.0.1", "::1") or client_ip.startswith("192.168.")
+        if via_tunnel or not is_local:
+            token = "Basic " + base64.b64encode(f"user:{password}".encode()).decode()
+            if request.headers.get("Authorization", "") != token:
+                return Response(
+                    status_code=401,
+                    headers={"WWW-Authenticate": 'Basic realm="fav", charset="UTF-8"'},
+                )
     return await call_next(request)
 
 
